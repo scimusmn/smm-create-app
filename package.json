@@ -1,0 +1,11 @@
+{
+  "name": "smm-create-app-root",
+  "private": true,
+  "description": "SMM project generator — clone this repo, `yarn install` once, then `yarn new <path>` to create projects.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "new": "node packages/cli/bin/create-smm-app.js"
+  }
+}

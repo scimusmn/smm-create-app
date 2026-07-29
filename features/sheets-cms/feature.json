@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  },
+  "scripts": {
+    "pull-content": "tsx scripts/pull-content.ts"
+  },
+  "env": ["SHEETS_ID"],
+  "postInstallNotes": [
+    "Sheets CMS: set SHEETS_ID in .env, make sure your sheet is published and public, then `npm run pull-content` (writes content/content.json)."
+  ]
+}

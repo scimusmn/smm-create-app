@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  },
+  "scripts": {
+    "sync-media": "tsx scripts/sync-media.ts"
+  },
+  "env": ["MEDIA_SOURCE"],
+  "postInstallNotes": [
+    "Set MEDIA_SOURCE in .env (gs://bucket/path or a Drive folder ID), then `npm run sync-media`."
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "features": ["serial", "kiosk"],
+  "postInstallNotes": [
+    "video-selector is a placeholder for now — the home page shows a coming-soon screen until the product is built."
+  ]
+}
