@@ -1,5 +1,5 @@
 {
-  "name": "smm-create-app-root",
+  "name": "smm-create-app",
   "private": true,
   "description": "SMM project generator — clone this repo, `yarn install` once, then `yarn new <path>` to create projects.",
   "workspaces": [
