@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@types/w3c-web-serial": "^1.0.7"
+  },
+  "postInstallNotes": [
+    "Serial debug page: http://localhost:3000/serial (Web Serial API)."
+  ]
+}
