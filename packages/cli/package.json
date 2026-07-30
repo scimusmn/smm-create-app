@@ -1,0 +1,23 @@
+{
+  "name": "smm-create-app",
+  "version": "0.1.0",
+  "description": "Scaffold a SMM Next.js + OpenNext Cloudflare project with house features",
+  "type": "module",
+  "bin": {
+    "create-smm-app": "bin/create-smm-app.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "template"
+  ],
+  "scripts": {
+    "prepack": "node src/bundle-templates.js"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}
