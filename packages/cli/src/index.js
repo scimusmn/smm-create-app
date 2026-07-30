@@ -130,9 +130,9 @@ export async function main(argv) {
 
   /* ---- done ---- */
   const steps = [
-    `cd ${target} && npm run dev`,
+    `cd ${target} && yarn dev`,
     ...notes,
-    "Deploy: npm run deploy",
+    "Deploy: yarn deploy",
   ];
   p.note(steps.map((s, i) => `${i + 1}. ${s}`).join("\n"), "Next steps");
   p.outro("Done. Go build something.");

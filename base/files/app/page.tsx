@@ -17,7 +17,7 @@ const FEATURES = [
     id: "sheets-cms",
     title: "Google Sheets CMS",
     notes: [
-      "After setting up a Google Sheet, run npm run pull-content to update content/content.json.",
+      "After setting up a Google Sheet, run yarn pull-content to update content/content.json.",
       "mport content through lib/content.ts.",
     ],
   },

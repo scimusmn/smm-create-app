@@ -8,68 +8,42 @@
 
 /**
  * useSerial — SMM standard Web Serial hook.
+ *
+ * Design rule (important): this hook deliberately separates two kinds of data:
+ *
+ *   1. LOW-frequency connection state (disconnected/connected/error) — fine
+ *      to keep in React state; it changes a few times per session.
+ *   2. HIGH-frequency incoming data — delivered via the `onLine` callback and
+ *      NEVER stored in React state by this hook. An Arduino can happily send
+ *      hundreds of lines per second; calling setState for each one will
+ *      re-render your component into the ground. Buffer in a ref and flush on
+ *      a throttled tick. See app/serial/page.tsx for the reference pattern.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export type SerialStatus = "unsupported" | "disconnected" | "connecting" | "connected" | "error";
 
 export interface UseSerialOptions {
-  /** Called once per complete newline-delimited message. */
-  onMessage?: (message: string) => void;
-  /** Called with only the newest message received since the previous sample.
-   *  Intermediate messages are intentionally discarded, making this suitable
-   *  for updating React state that displays a live sensor value. */
-  onLatestMessage?: (message: string) => void;
-  /** Minimum interval between `onLatestMessage` calls. Defaults to 60 ms.
-   *  Recommend range: 60-100 */
-  latestMessageIntervalMs?: number;
+  /** Called once per received line (newline-delimited). Runs OUTSIDE React
+   *  rendering — do not call setState in here for high-rate streams. */
+  onLine?: (line: string) => void;
   baudRate?: number;
 }
 
 type SerialWriter = WritableStreamDefaultWriter<Uint8Array>;
 
 const DEFAULT_BAUD_RATE = 9600;
-const DEFAULT_LATEST_MESSAGE_INTERVAL_MS = 60;
 
-export function useSerial({
-  onMessage,
-  onLatestMessage,
-  latestMessageIntervalMs = DEFAULT_LATEST_MESSAGE_INTERVAL_MS,
-  baudRate = DEFAULT_BAUD_RATE,
-}: UseSerialOptions = {}) {
+export function useSerial({ onLine, baudRate = DEFAULT_BAUD_RATE }: UseSerialOptions = {}) {
   const [status, setStatus] = useState<SerialStatus>("disconnected");
   const [error, setError] = useState<string | null>(null);
-  const [portInfo, setPortInfo] = useState<SerialPortInfo | null>(null);
 
   const portRef = useRef<SerialPort | null>(null);
   const writerRef = useRef<SerialWriter | null>(null);
   const readAbortControllerRef = useRef<AbortController | null>(null);
 
-  const onMessageRef = useRef(onMessage);
-  const onLatestMessageRef = useRef(onLatestMessage);
-  onMessageRef.current = onMessage;
-  onLatestMessageRef.current = onLatestMessage;
-
-  const latestMessageRef = useRef("");
-  const hasPendingLatestMessageRef = useRef(false);
-  const latestMessageSamplingIsEnabled =
-    onLatestMessage !== undefined && latestMessageIntervalMs > 0;
-
-  useEffect(() => {
-    if (!latestMessageSamplingIsEnabled) {
-      hasPendingLatestMessageRef.current = false;
-      return;
-    }
-
-    const samplingTimer = window.setInterval(() => {
-      if (!hasPendingLatestMessageRef.current) return;
-
-      hasPendingLatestMessageRef.current = false;
-      onLatestMessageRef.current?.(latestMessageRef.current);
-    }, latestMessageIntervalMs);
-
-    return () => window.clearInterval(samplingTimer);
-  }, [latestMessageSamplingIsEnabled, latestMessageIntervalMs]);
+  const onLineRef = useRef(onLine);
+  onLineRef.current = onLine;
 
   useEffect(() => {
     if (typeof navigator !== "undefined" && !("serial" in navigator)) {
@@ -82,7 +56,6 @@ export function useSerial({
 
   const disconnect = useCallback(async () => {
     readAbortControllerRef.current?.abort();
-    hasPendingLatestMessageRef.current = false;
 
     await closeIgnoringErrors(writerRef.current);
     writerRef.current = null;
@@ -90,7 +63,6 @@ export function useSerial({
     await closeIgnoringErrors(portRef.current);
     portRef.current = null;
 
-    setPortInfo(null);
     setStatus("disconnected");
   }, []);
 
@@ -100,16 +72,13 @@ export function useSerial({
   const connect = useCallback(async () => {
     if (!("serial" in navigator)) return;
 
-    hasPendingLatestMessageRef.current = false;
-    setPortInfo(null);
     setError(null);
     setStatus("connecting");
 
     try {
       const port = await navigator.serial.requestPort();
-      setPortInfo(port.getInfo());
-
       await port.open({ baudRate });
+
       portRef.current = port;
       writerRef.current = port.writable!.getWriter();
       setStatus("connected");
@@ -117,19 +86,14 @@ export function useSerial({
       const readAbortController = new AbortController();
       readAbortControllerRef.current = readAbortController;
 
-      void readLines(port, readAbortController.signal, (message) => {
-        onMessageRef.current?.(message);
+      void readLines(port, readAbortController.signal, (line) => onLineRef.current?.(line)).catch(
+        (cause: unknown) => {
+          if (readAbortController.signal.aborted) return;
 
-        if (onLatestMessageRef.current) {
-          latestMessageRef.current = message;
-          hasPendingLatestMessageRef.current = true;
-        }
-      }).catch((cause: unknown) => {
-        if (!readAbortController.signal.aborted) {
           setError(toErrorMessage(cause));
           setStatus("error");
-        }
-      });
+        },
+      );
     } catch (cause) {
       if (isPortPickerCancellation(cause)) {
         setStatus("disconnected");
@@ -141,15 +105,15 @@ export function useSerial({
     }
   }, [baudRate]);
 
-  const sendMessage = useCallback(async (message: string) => {
+  const write = useCallback(async (text: string) => {
     const writer = writerRef.current;
     if (!writer) throw new Error("Not connected");
 
-    const encodedMessage = new TextEncoder().encode(withTrailingNewline(message));
-    await writer.write(encodedMessage);
+    const encodedText = new TextEncoder().encode(withTrailingNewline(text));
+    await writer.write(encodedText);
   }, []);
 
-  return { status, error, portInfo, connect, disconnect, sendMessage };
+  return { status, error, connect, disconnect, write };
 }
 
 async function readLines(
@@ -214,8 +178,8 @@ async function closeIgnoringErrors(resource: { close(): Promise<void> } | null) 
   }
 }
 
-function withTrailingNewline(message: string) {
-  return message.endsWith("\n") ? message : `${message}\n`;
+function withTrailingNewline(text: string) {
+  return text.endsWith("\n") ? text : `${text}\n`;
 }
 
 function isPortPickerCancellation(cause: unknown) {

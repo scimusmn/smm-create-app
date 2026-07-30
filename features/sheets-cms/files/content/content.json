@@ -3,6 +3,6 @@
   "sheetId": "",
   "range": "Sheet1",
   "records": [
-    { "key": "example", "value": "Run `npm run pull-content` to replace this seed data." }
+    { "key": "example", "value": "Run `yarn pull-content` to replace this seed data." }
   ]
 }
