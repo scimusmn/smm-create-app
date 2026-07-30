@@ -7,6 +7,6 @@
   },
   "env": ["SHEETS_ID"],
   "postInstallNotes": [
-    "Sheets CMS: set SHEETS_ID in .env, make sure your sheet is published and public, then `npm run pull-content` (writes content/content.json)."
+    "Sheets CMS: set SHEETS_ID in .env, make sure your sheet is published and public, then `yarn pull-content` (writes content/content.json)."
   ]
 }

@@ -15,7 +15,7 @@ This still needs to be finished. It should remain lightweight, but specific enou
 
 ## Checklist
 
-- [ ] Runs locally (`npm run dev`) with no console errors
-- [ ] Builds for Workers (`npm run preview`) if deploy-affecting
-- [ ] Content pulled/committed if this depends on CMS changes (`npm run pull-content`)
-- [ ] No large media committed (use `npm run sync-media`)
+- [ ] Runs locally (`yarn dev`) with no console errors
+- [ ] Builds for Workers (`yarn preview`) if deploy-affecting
+- [ ] Content pulled/committed if this depends on CMS changes (`yarn pull-content`)
+- [ ] No large media committed (use `yarn sync-media`)

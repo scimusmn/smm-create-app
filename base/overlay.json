@@ -7,6 +7,6 @@
   },
   "env": ["MEDIA_SOURCE"],
   "postInstallNotes": [
-    "Set MEDIA_SOURCE in .env (gs://bucket/path or a Drive folder ID), then `npm run sync-media`."
+    "Set MEDIA_SOURCE in .env (gs://bucket/path or a Drive folder ID), then `yarn sync-media`."
   ]
 }
