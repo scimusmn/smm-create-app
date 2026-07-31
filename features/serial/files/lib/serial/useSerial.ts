@@ -24,6 +24,8 @@ export interface UseSerialOptions {
    *  Recommend range: 60-100 */
   latestMessageIntervalMs?: number;
   baudRate?: number;
+  /** Connect on mount using getPorts() (no user gesture; used by Stele). */
+  autoConnect?: boolean;
 }
 
 type SerialWriter = WritableStreamDefaultWriter<Uint8Array>;
@@ -36,6 +38,7 @@ export function useSerial({
   onLatestMessage,
   latestMessageIntervalMs = DEFAULT_LATEST_MESSAGE_INTERVAL_MS,
   baudRate = DEFAULT_BAUD_RATE,
+  autoConnect = false,
 }: UseSerialOptions = {}) {
   const [status, setStatus] = useState<SerialStatus>("disconnected");
   const [error, setError] = useState<string | null>(null);
@@ -106,7 +109,11 @@ export function useSerial({
     setStatus("connecting");
 
     try {
-      const port = await navigator.serial.requestPort();
+      // Prefer already-granted ports (no user gesture). Needed for Stele kiosks.
+      const grantedPorts = await navigator.serial.getPorts();
+      const port = grantedPorts.find(p => p.getInfo().usbVendorId !== undefined)
+        ?? grantedPorts[0]
+        ?? await navigator.serial.requestPort();
       setPortInfo(port.getInfo());
 
       await port.open({ baudRate });
@@ -131,7 +138,7 @@ export function useSerial({
         }
       });
     } catch (cause) {
-      if (isPortPickerCancellation(cause)) {
+      if (isPortPickerCancellation(cause) || isMissingUserGesture(cause)) {
         setStatus("disconnected");
         return;
       }
@@ -140,6 +147,15 @@ export function useSerial({
       setStatus("error");
     }
   }, [baudRate]);
+
+  const connectRef = useRef(connect);
+  connectRef.current = connect;
+
+  useEffect(() => {
+    if (!autoConnect) return;
+    if (typeof navigator === "undefined" || !("serial" in navigator)) return;
+    void connectRef.current();
+  }, [autoConnect]);
 
   const sendMessage = useCallback(async (message: string) => {
     const writer = writerRef.current;
@@ -220,6 +236,14 @@ function withTrailingNewline(message: string) {
 
 function isPortPickerCancellation(cause: unknown) {
   return cause instanceof DOMException && cause.name === "NotFoundError";
+}
+
+function isMissingUserGesture(cause: unknown) {
+  return (
+    cause instanceof DOMException
+    && cause.name === "SecurityError"
+    && /user gesture/i.test(cause.message)
+  );
 }
 
 function toErrorMessage(cause: unknown) {
