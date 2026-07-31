@@ -36,6 +36,7 @@ import { useSerial } from "@/lib/serial/useSerial";
 
 export default function SerialExample() {
   const { status, error, connect, disconnect, sendMessage } = useSerial({
+    autoConnect: true, // Stele: connect via getPorts() with no click
     onMessage: (message) => {
       console.log("Received:", message);
     },
@@ -89,7 +90,7 @@ async function turnLedOn() {
 }`;
 
 export default function SerialDebugPage() {
-  const [baudRate, setBaudRate] = useState(9600);
+  const [baudRate, setBaudRate] = useState(115200);
   const [visibleLines, setVisibleLines] = useState<string[]>([]);
   const [stats, setStats] = useState({ total: 0, perSecond: 0 });
   const [paused, setPaused] = useState(false);
@@ -104,6 +105,7 @@ export default function SerialDebugPage() {
 
   const { status, error, portInfo, connect, disconnect, sendMessage } = useSerial({
     baudRate,
+    autoConnect: true,
     // This callback fires per line at wire speed. Note: no setState in here.
     onMessage: (line) => {
       totalRef.current += 1;
@@ -284,8 +286,9 @@ export default function SerialDebugPage() {
         <section className="border-t border-sky-200 px-5 pb-5 pt-4">
           <h2 className="text-base font-bold text-sky-950">Bare Minimum Setup</h2>
           <p className="mt-2 text-neutral-700">
-            Call <code>connect</code> from a button before listening for or sending messages. The browser requires a
-            user action before it can open the serial-port picker.
+            Call <code>connect</code> from a button, or pass <code>autoConnect: true</code> for Stele
+            kiosks (uses <code>getPorts()</code>, no click). In a normal browser,{" "}
+            <code>requestPort()</code> still needs a user gesture when nothing is granted yet.
           </p>
           <pre className="mt-3 overflow-x-auto rounded bg-neutral-950 p-3 font-mono text-xs leading-5 text-emerald-200">
             <code>{MINIMUM_SETUP_EXAMPLE}</code>
