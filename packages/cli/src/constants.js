@@ -13,10 +13,12 @@ import { fileURLToPath } from "node:url";
  * if a new un-flagged prompt appears, the dev simply answers it
  * interactively instead of the scaffold breaking.
  *
- * Known gotcha (verified against C3 2.70): do NOT pass `--lang=ts`. The next
- * template is TypeScript-only and declares no language variants, so the
- * --lang filter removes it from the framework map and C3 errors with
- * "Unsupported framework: next".
+ * Known gotchas:
+ * - (C3 2.70) do NOT pass `--lang=ts`. The next template is TypeScript-only
+ *   and declares no language variants, so the --lang filter removes it from
+ *   the framework map and C3 errors with "Unsupported framework: next".
+ * - (C3 2.72+) pass `--variant=vinext` (or `opennext`) to skip the new
+ *   "Which Next.js adapter?" prompt, which otherwise blocks non-interactive runs.
  */
 export const c3Args = (projectName) => [
   "create",
@@ -25,6 +27,7 @@ export const c3Args = (projectName) => [
   projectName,
   "--framework=next",
   "--platform=workers",
+  "--variant=vinext",
   "--git",
   "--no-deploy",
 ];
