@@ -169,7 +169,7 @@ async function addFeature(featureId, templateRoot) {
   }
   p.intro(`Adding feature: ${featureId}`);
   const notes = applyOverlay(projectDir, path.join(templateRoot, "features", featureId));
-  p.log.warn("Feature files copied and package.json updated — run `npm install`.");
+  p.log.warn("Feature files copied and package.json updated — run `yarn install`.");
   p.log.warn(`Add "${featureId}" to the features array in lib/template-config.ts so the home page shows it.`);
   for (const n of notes) p.log.info(n);
   p.outro("Done.");
