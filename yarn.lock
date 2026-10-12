@@ -26,6 +26,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^22.15.0":
+  version: 22.20.5
+  resolution: "@types/node@npm:22.20.5"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10c0/0cf61a89c6a69917ab49f976a6bb11a29e3b348a6ae19f5827ceb91d3ade781faab58dcf3b8fa625f975f5d7536b9166ff94e8250c29272c667164f77c28fa88
+  languageName: node
+  linkType: hard
+
 "@types/w3c-web-serial@npm:^1.0.7":
   version: 1.0.8
   resolution: "@types/w3c-web-serial@npm:1.0.8"
@@ -51,6 +60,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "smm-create-app-repo@workspace:."
   dependencies:
+    "@types/node": "npm:^22.15.0"
     "@types/w3c-web-serial": "npm:^1.0.7"
   languageName: unknown
   linkType: soft
@@ -64,3 +74,10 @@ __metadata:
     create-smm-app: bin/create-smm-app.js
   languageName: unknown
   linkType: soft
+
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 10c0/c01ed51829b10aa72fc3ce64b747f8e74ae9b60eafa19a7b46ef624403508a54c526ffab06a14a26b3120d055e1104d7abe7c9017e83ced038ea5cf52f8d5e04
+  languageName: node
+  linkType: hard

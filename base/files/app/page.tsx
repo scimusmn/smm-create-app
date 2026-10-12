@@ -18,7 +18,7 @@ const FEATURES = [
     title: "Google Sheets CMS",
     notes: [
       "After setting up a Google Sheet, run yarn pull-content to update content/content.json.",
-      "mport content through lib/content.ts.",
+      "Import content through lib/content.ts.",
     ],
   },
   {
